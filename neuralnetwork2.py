@@ -3,7 +3,7 @@
 import numpy as np
 import random
 import datetime
-
+import matplotlib.pyplot as plt
 
 global end_out
 #create node class
@@ -179,6 +179,7 @@ while True:
         print("train: Trains the algorithm")
         print("kill: Kills the current code for resets.")
     if co == "train":
+        diff_cache = []
         print("Training algorithm")
         train_times = int(input("How many times do you want the algorithm to train for."))
         datetime_object = datetime.datetime.now()
@@ -190,17 +191,25 @@ while True:
             #save_weights(in_layers) Commented because of lag and high storage usage
             
             print(dif)
+            diff_cache.append(dif)
             print(end_out,"Actual output")
             #Back prop start#
-            for l in in_layers: #For every single layer in the network
-                for j in l: #For every single node in the layer
-                    for n in 
-                    
+           # for l in in_layers: #For every single layer in the network
+                #for j in l: #For every single node in the layer
+                    #for n in 
+            for o in range(0, len(objs)-1):
+                 for j in range(0, len(objs[o].weights)-1):
+                     objs[o].weights[j] = objs[o].weights[j] * 0.999
                     
             
             
         datetime_object2 = datetime.datetime.now()
         print("Time taken was",datetime_object2 - datetime_object)
+        save_q = input("Do you want to save the difference output as a .nng file.y/n")
+        if save_q == "y":
+            file = open("difference_cache.nng","w")
+            file.write(str(diff_cache))
+            file.close()
 
             
         
@@ -213,3 +222,30 @@ while True:
         end_out = run(inp)
         print("Final value of output node was",end_out)
         print("The difference between the desired and actual num was", abs(Desired- end_out))
+    if co == "draw":
+        print("Will now draw a graph of the previous difference data.")
+        file = open("difference_cache.nng","r")
+        fdata = file.read()
+        fdata = fdata.replace("[", "")
+        fdata = fdata.replace("]", "")
+        data2 = fdata.split(",")
+        
+        x = []
+        for i in range(0, len(data2)):
+            x.append(i)
+        # corresponding y axis values 
+        for i in range(0, len(data2)):
+            data2[i] = float(data2[i])
+        # plotting the points  
+        plt.plot(x, data2) 
+          
+        # naming the x axis 
+        plt.xlabel('iteration') 
+        # naming the y axis 
+        plt.ylabel('Distance from desired') 
+          
+        # giving a title to my graph 
+        plt.title('Difference graph.') 
+          
+        # function to show the plot 
+        plt.show() 
