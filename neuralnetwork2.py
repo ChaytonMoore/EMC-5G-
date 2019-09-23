@@ -14,6 +14,17 @@ class Node():
     layer = 0
     temp_value = 0
     temp_nums = []
+
+def linsearch(array,find):
+    idx = 0
+    for i in array:
+        if i == find:
+            break
+    idx += 1
+    return idx
+            
+    
+    
     
 
 #Create the node classes
@@ -197,16 +208,79 @@ while True:
            # for l in in_layers: #For every single layer in the network
                 #for j in l: #For every single node in the layer
                     #for n in 
-            for o in range(0, len(objs)-1):
-                 for j in range(0, len(objs[o].weights)-1):
-                     objs[o].weights[j] = objs[o].weights[j] * 0.999
-                    
+          #  for o in range(0, len(objs)-1):
+          #       for j in range(0, len(objs[o].weights)-1):
+             #        if objs[o].weights[j] > Desired/len(objs):
+                #         objs[o].weights[j] = objs[o].weights[j] * 0.999
+           
+            #Start of new code for advanced back propogation
+            paths = []
+            temp_path = []
+            paths_weights = []
+            temp_path_weights = []
+            
+            #for o in layer5Objs:#For every output node
+            #    for j in o.inputs:#For each of the input nodes of the out nodes
+               #     temp_inn = linsearch(j.outputs,o)#find the index of the weight/output which the other node is linked to.
+               #     temp_path.append([j,temp_inn])#0 = the input/weight index and #1 is the node which it applies to.
+                #    paths.append(temp_path)#adds the temp path to the main paths list
+                 #   temp_path = []#empties the temp path
+            #Currently paths are only a single node deep and are so very basic
+            #Now the paths have been created to be trained 
+            #What will now happen is the impact that each path has will be determined and then the impact of each node and each weight.
+    
+            n_c_idx = 0#The node choose index
+            for o in layer5Objs:#For every single output node
+                temp_c_node = o#Sets the value to the first thing.
+                while temp_c_node not in layer0Objs:#While the node it has gone back to isn't an input node. 
+                     if type(temp_c_node.inputs) != list:
+                         print(type(temp_c_node.inputs))
+                         tvar = [] 
+                         tvar.append(temp_c_node.inputs)
+                         temp_c_node.inputs = tvar
+                         print("forcing list")
+                     temp_path.append(temp_c_node) #Appends the current node to the path
+                     temp_c_node.inputs = list(temp_c_node.inputs)
+                     print("Done once.")
+                     
+                     print(temp_c_node.inputs)
+                     #if temp_c_node.layer == 1:#I think this is only temporary until I have many different input nodes 
+                     temp_path_weights.append(temp_c_node.inputs[n_c_idx].weights[linsearch(temp_c_node.inputs[n_c_idx].outputs,temp_c_node)])
+                     
+                     #else:
+                         #temp_path_weights.append(temp_c_node.inputs[n_c_idx].weights[linsearch(temp_c_node.inputs[n_c_idx].outputs,temp_c_node)])#Gets the index for the place which the temp node is in the previouses nodes ouputs
+                     #Explaination for the previous line
+                     #It appends the weight that is needed to the temp_path_weights variable.
+                     #It searches for the particular node in the input nodes outputs then feeds that index for the other part to use
+                     #to get the weight of the node.
+                     temp_c_node = temp_c_node.inputs[n_c_idx]#sets the temp node to the next value
+                #The while loop has now finished. And the temp vars will be put into other vars and then emptied
+                print("The end of a while loop run.")
+                paths.append(temp_path)
+                paths_weights.append(temp_path_weights)
+                #Now empty the temp vars
+                temp_path = []
+                temp_paths_weights = []
+                
+                     
+                n_c_idx += 1
+                     
+            
+            for path in paths:
+                print(path[0][0])
+                node = path[0][0]#This is confusing but needed
+                weight = node.weights[path[0][1]]
+                print(weight)#The weights are what is important
+               # if weight #I Think I 'll simulate the event of a weight getting a 
+                
+                
+            
             
             
         datetime_object2 = datetime.datetime.now()
-        print("Time taken was",datetime_object2 - datetime_object)
+        print("Time taken was",datetime_object2 - datetime_object)#outputs time taken
         save_q = input("Do you want to save the difference output as a .nng file.y/n")
-        if save_q == "y":
+        if save_q == "y":#This will save the output of the training in an external file.
             file = open("difference_cache.nng","w")
             file.write(str(diff_cache))
             file.close()
