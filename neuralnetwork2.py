@@ -200,7 +200,6 @@ while True:
             #it needs to be able to save the current layout of the weights
             in_layers = [layer5Objs,layer4Objs,layer3Objs,layer2Objs,layer1Objs,layer0Objs]
             #save_weights(in_layers) Commented because of lag and high storage usage
-            
             print(dif)
             diff_cache.append(dif)
             print(end_out,"Actual output")
