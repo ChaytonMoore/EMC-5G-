@@ -5,6 +5,7 @@ import random
 import datetime
 import matplotlib.pyplot as plt
 
+
 global end_out
 #create node class
 class Node():
@@ -126,18 +127,23 @@ def run(inp):
     for i in objs:
         i.temp_value = 0
         i.temp_nums = []
-    in_node.temp_value = 1#This is only temp code for testing temp_value can be different
+    in_node.temp_value = 1 #This is only temp code for testing temp_value can be different
 
     for i in layer0Objs:
         temp_idx = 0
         for j in i.outputs:
-            j.temp_value = i.temp_value * i.weights[temp_idx] #The prolem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
+            j.temp_value = i.temp_value * i.weights[temp_idx] #The problem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
             temp_idx += 1
             
 
     for i in layer1Objs:
-        for n in i.temp_nums:
+        for n in i.temp_nums:#So we have created a number from all the other nodes nums sum.
             i.temp_value += n
+        #sigmoid equation
+        curve = 1/(1+)
+        #square root
+        root = sqrt(i.temp_value)
+        
         i.temp_nums = []
         temp_idx = 0
         for j in i.outputs:
@@ -263,11 +269,12 @@ while True:
                 
                      
                 n_c_idx += 1
-                     
+            
+            print(paths)
             
             for path in paths:
                 print(path[0][0])
-                node = path[0][0]#This is confusing but needed
+                node = path[0][0]#This is confusing but neededs
                 weight = node.weights[path[0][1]]
                 print(weight)#The weights are what is important
                # if weight #I Think I 'll simulate the event of a weight getting a 
