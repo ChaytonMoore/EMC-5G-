@@ -206,7 +206,7 @@ def run(inp):
         curve = 1/(1+(math.e**(0-(i.temp_value/1000))))#Sigmoid graph point calculation
        #The curve used here is made so numbers in the hundreds will result in managable numbers.
         
-        #square root 
+        #square root
         
         print("curve",curve)
         root = math.sqrt(curve)
