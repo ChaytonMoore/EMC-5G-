@@ -4,17 +4,32 @@ import numpy as np
 import random
 import datetime
 import matplotlib.pyplot as plt
+import math
 
 
 global end_out
 #create node class
 class Node():
     outputs = []
-    inputs = []
     weights = []
     layer = 0
     temp_value = 0
     temp_nums = []
+
+class request():#This class contains the data from the list of needed items
+    #Imported data
+    priority = 0#1-100 for weighting of rewards
+    CPUsReq = 0#number of CPUs required
+    RAMReq = 0#number of RAM slots required
+    exp_wait = 0#How long it is ok with waiting
+    
+    #Changeable data
+    actual_wait = 0
+
+
+    
+    
+
 
 def linsearch(array,find):
     idx = 0
@@ -23,7 +38,25 @@ def linsearch(array,find):
             break
     idx += 1
     return idx
+
+def FindImp(result,network,reward):#Finds the impact of a node on a given neural network result
+            #Result = what the network get
+            #network = the network itself
+            #reward = the value gotten how good it performed should be some value(maybe pos and neg)
             
+            
+            #What I need to do first is determine each nodes impact on the result
+            for i in network:
+                for w in i.weights: 
+                    #now i need to trace it forwards and determine the impact of each node
+                    TargetNode = i#current trace node
+                    impact = 1 # what impact the node in particular has on the output
+                    while TargetNode != out_node:#while the target that the trace is on isn't the last one
+                        TargetNode.weights[0]
+                        
+                        
+                
+                
     
     
     
@@ -140,9 +173,13 @@ def run(inp):
         for n in i.temp_nums:#So we have created a number from all the other nodes nums sum.
             i.temp_value += n
         #sigmoid equation
-        curve = 1/(1+)
+        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
         #square root
-        root = sqrt(i.temp_value)
+        root = math.sqrt(curve)
+        
+        i.temp_value = root#This sets the value for the node to be that of the eq
+        print(i.temp_value,"temp value")
+       
         
         i.temp_nums = []
         temp_idx = 0
@@ -155,21 +192,40 @@ def run(inp):
             i.temp_value += n
         i.temp_nums = []
         temp_idx = 0
+        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
+        #square root
+        root = math.sqrt(curve)
+        
+        i.temp_value = root#This sets the value for the node to be that of the eq
+        print(i.temp_value,"temp val of l2")
+        
         for j in i.outputs:
             j.temp_nums.append(i.temp_value*i.weights[temp_idx])
             temp_idx += 1
     
     for i in layer3Objs:
         for n in i.temp_nums:
-            i.temp_value += n   
+            i.temp_value += n 
+            
+        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
+        #square root
+        root = math.sqrt(curve)
+        
+        i.temp_value = root#This sets the value for the node to be that of the eq    
+        print(i.temp_value,"temp val of l3")
         temp_idx = 0
         for j in i.outputs:
             j.temp_nums.append(i.temp_value*i.weights[temp_idx])
             temp_idx += 1
     
     for i in layer4Objs:
-        for n in i.temp_nums:
+        for n in i.temp_nums: 
             i.temp_value += n
+        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
+        #square root
+        root = math.sqrt(curve)
+        i.temp_value = root#This sets the value for the node to be that of the eq
+        print(i.temp_value,"temp val of l4")
         temp_idx = 0
         for j in i.outputs:
             j.temp_nums.append(i.temp_value*i.weights[temp_idx])
@@ -178,12 +234,25 @@ def run(inp):
     for i in layer5Objs:
         for n in i.temp_nums:
             i.temp_value += n
-
+        print(i.temp_value)
+        curve = 1/(1+(math.e**(0-(i.temp_value/1000))))#Sigmoid graph point calculation
+       #The curve used here is made so numbers in the hundreds will result in managable numbers.
+        
+        #square root
+        
+        print("curve",curve)
+        root = math.sqrt(curve)
+        
+        i.temp_value = root#This sets the value for the node to be that of the eq
+        print(i.temp_value,"temp val of l5")
+        print(i)
     #Now all nodes that have data in temp_nums will have it added.
         
    # for i in objs:
       #  for j in i.temp_nums:
            # i.temp_value += (j)
+    print(out_node)
+    print(out_node.temp_value,"last")
     end_out = out_node.temp_value # might be a problem with setting the value of the output to something else
     
     
@@ -195,6 +264,7 @@ while True:
     if co == "help":
         print("train: Trains the algorithm")
         print("kill: Kills the current code for resets.")
+    
     if co == "train":
         diff_cache = []
         print("Training algorithm")
@@ -202,11 +272,12 @@ while True:
         datetime_object = datetime.datetime.now()
         for i in range(0, train_times):
             end_out = run(inp)#runs the network once
+            print(end_out)
             dif = abs(end_out-Desired)#finds the difference
             #it needs to be able to save the current layout of the weights
             in_layers = [layer5Objs,layer4Objs,layer3Objs,layer2Objs,layer1Objs,layer0Objs]
             #save_weights(in_layers) Commented because of lag and high storage usage
-            print(dif)
+            print(dif,"difference")
             diff_cache.append(dif)
             print(end_out,"Actual output")
             #Back prop start#
@@ -239,16 +310,16 @@ while True:
                 temp_c_node = o#Sets the value to the first thing.
                 while temp_c_node not in layer0Objs:#While the node it has gone back to isn't an input node. 
                      if type(temp_c_node.inputs) != list:
-                         print(type(temp_c_node.inputs))
+                         #print(type(temp_c_node.inputs))
                          tvar = [] 
                          tvar.append(temp_c_node.inputs)
                          temp_c_node.inputs = tvar
-                         print("forcing list")
+                         #print("forcing list")
                      temp_path.append(temp_c_node) #Appends the current node to the path
                      temp_c_node.inputs = list(temp_c_node.inputs)
-                     print("Done once.")
+                    # print("Done once.")
                      
-                     print(temp_c_node.inputs)
+                    # print(temp_c_node.inputs)
                      #if temp_c_node.layer == 1:#I think this is only temporary until I have many different input nodes 
                      temp_path_weights.append(temp_c_node.inputs[n_c_idx].weights[linsearch(temp_c_node.inputs[n_c_idx].outputs,temp_c_node)])
                      
@@ -270,19 +341,22 @@ while True:
                      
                 n_c_idx += 1
             
-            print(paths)
+            #print(paths)
             
-            for path in paths:
-                print(path[0][0])
-                node = path[0][0]#This is confusing but neededs
-                weight = node.weights[path[0][1]]
-                print(weight)#The weights are what is important
+          #  for path in paths: #Good idea to use this again
+               # print(path[0][0])
+               # node = path[0][0]#This is confusing but neededs
+               # weight = node.weights[path[0][1]]
+                #print(weight)#The weights are what is important
+                
+                
                # if weight #I Think I 'll simulate the event of a weight getting a 
+               
                 
                 
             
             
-            
+        print("Diffcache",diff_cache)    
         datetime_object2 = datetime.datetime.now()
         print("Time taken was",datetime_object2 - datetime_object)#outputs time taken
         save_q = input("Do you want to save the difference output as a .nng file.y/n")
@@ -302,6 +376,15 @@ while True:
         end_out = run(inp)
         print("Final value of output node was",end_out)
         print("The difference between the desired and actual num was", abs(Desired- end_out))
+        
+    if co == "load":
+        f_open = input("which file do you want to open, do not include extension.")
+        f_open = f_open + ".5GD"
+        file = open(f_open,"r")
+        LD = file.read()
+        LD = LD.split(")(")
+        print(LD)
+    
     if co == "draw":
         print("Will now draw a graph of the previous difference data.")
         file = open("difference_cache.nng","r")
@@ -329,3 +412,15 @@ while True:
           
         # function to show the plot 
         plt.show() 
+    
+    if co == "load requests":
+        print("Will now load request data from file.")
+        rq_f_n = input("What file do you want to open, include extension.")
+        rq_file = open(rq_f_n,"r")
+        rq_data = rq_file.read()
+        rq_data = rq_data.split(")(")
+        rq_data.remove("(","")
+        rq_data.remove(")","")
+        for entry in rq_data:
+            entry = entry.split(",")
+            
