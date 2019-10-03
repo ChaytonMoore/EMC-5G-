@@ -25,9 +25,39 @@ class request():#This class contains the data from the list of needed items
     
     #Changeable data
     actual_wait = 0
-
-
     
+    def __init__(self, priority,CPUsReq,RAMReq,exp_wait):
+        self.priority = priority
+        self.CPUsReq = CPUsReq
+        self.RAMReq = RAMReq
+        self.exp_wait = exp_wait
+
+requests = []
+
+def ImportData(): #This function will populate the requests when called. Takes times to do
+    #Read statis is weather to read the file again or just use the d
+    print("Will now load request data from file.")
+    rq_f_n = input("What file do you want to open, include extension.")
+    rq_file = open(rq_f_n,"r")
+    rq_data = rq_file.read()
+    rq_data = rq_data.split(")(")
+    rq_data.remove("(","")
+    rq_data.remove(")","")
+    outputdata = []
+    for entry in rq_data:
+        entry = entry.split(",")
+        outputdata.append(entry)
+    
+    return outputdata
+        
+def refresh_line(DataList,Queue):#Adds more data to the queue from the file data
+    for i in range(0,(10 - len(Queue))):
+        requests.append()
+        del DataList[0]
+        
+        
+        
+        
     
 
 
@@ -414,13 +444,7 @@ while True:
         plt.show() 
     
     if co == "load requests":
-        print("Will now load request data from file.")
-        rq_f_n = input("What file do you want to open, include extension.")
-        rq_file = open(rq_f_n,"r")
-        rq_data = rq_file.read()
-        rq_data = rq_data.split(")(")
-        rq_data.remove("(","")
-        rq_data.remove(")","")
-        for entry in rq_data:
-            entry = entry.split(",")
+        #Will now run a function
+        DataList = ImportData()
+            
             
