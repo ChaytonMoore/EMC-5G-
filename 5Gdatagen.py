@@ -24,9 +24,19 @@ while True:
         DName = input("What do you want the file to be called. Note: Don't include file type.")
         DName = DName +".5GD"
         file = open(DName,"w")
+        count = 0
         for i in Data:
-            w = (i[0],i[1],i[2],i[3])
-            file.write(str(w))
+            w = i[0],i[1],i[2],i[3]
+            w = str(w)
+            if count == 0:
+                print("Replacing")
+                w = w.replace("(","")
+            elif count == len(Data)-1:
+                w = w.replace(")","")
+
+            count += 1
+            print(w)
+            file.write(w)
         file.close()
     if inp == "kill":
         print("Killing programme")

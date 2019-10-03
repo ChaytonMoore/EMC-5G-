@@ -1,6 +1,6 @@
 #Under CC:BY-NC
 #Neural network code
-import numpy as np
+#import numpy as np
 import random
 import datetime
 import matplotlib.pyplot as plt
@@ -26,29 +26,34 @@ class request():#This class contains the data from the list of needed items
     #Changeable data
     actual_wait = 0
     
-    def __init__(self, priority,CPUsReq,RAMReq,exp_wait):
+    def __init__(self, priority,CPUsReq,RAMReq,exp_wait): #an init function
         self.priority = priority
         self.CPUsReq = CPUsReq
         self.RAMReq = RAMReq
         self.exp_wait = exp_wait
 
+
 requests = []
+DataList = []
 
 def ImportData(): #This function will populate the requests when called. Takes times to do
     #Read statis is weather to read the file again or just use the d
     print("Will now load request data from file.")
     rq_f_n = input("What file do you want to open, include extension.")
     rq_file = open(rq_f_n,"r")
-    rq_data = rq_file.read()
+    rq_data = rq_file.read() # reads the data from the file
+    rq_data.replace("(","")  # All of this code cleans the data and readies it for use. 
+    rq_data.replace(")","")
     rq_data = rq_data.split(")(")
-    rq_data.remove("(","")
-    rq_data.remove(")","")
     outputdata = []
     for entry in rq_data:
         entry = entry.split(",")
-        outputdata.append(entry)
+        outputdata.append(entry) 
     
-    return outputdata
+    classD = [] #creates an empty list for the use of adding different.
+    for i in outputdata: #for every obj in a list
+        classD.append(request(i[2],i[0],i[1],i[3]))# Setting up the class for each request.
+    return classD#returns the class list to the main programme.
         
 def refresh_line(DataList,Queue):#Adds more data to the queue from the file data
     for i in range(0,(10 - len(Queue))):
@@ -443,8 +448,17 @@ while True:
         # function to show the plot 
         plt.show() 
     
-    if co == "load requests":
+    if co == "load requests": # Function near start, for populating the Datalist.
         #Will now run a function
         DataList = ImportData()
+    
+    if co == "view cache": # used for viewing a set of data.
+        for i in DataList:#For everything in the data list
+            print("For object",i," these are the stats for it.")
+            print(i.priority,"The objects priority.")
+            print(i.RAMReq,"The requirements for RAM")
+            print(i.CPUsReq,"The requirements for CPU")
+            print(i.exp_wait,"The time it expects to wait.")
+
             
             
