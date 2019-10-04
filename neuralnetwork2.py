@@ -8,6 +8,35 @@ import math
 
 
 global end_out
+global TotalWaitTime #This variable is the total time that is waited by requests, perhaps waited by importance.
+
+#####SET UP FOR THE CPU AND RAM START######
+class Partition():#This class contains the data for the partition of either cpu or RAM
+    variant = ""#Either CPU or RAM
+    Owner_Id = ""#This is the identifier of the 
+    usage = False#Weather or not in use, other values should be empty except for variant if this is false
+
+
+CPUs = [] # These are empty lists for the differet pieces of RAM and CPU
+RAM = []
+
+for i in range(0, 12):
+    tmp_p_c = Partition()
+    tmp_p_c.variant  = "CPU" #This is the code for creating CPUs
+    CPUs.append(temp_p_c)
+
+for i in range(0, 12):
+    tmp_p_c = Partition()
+    tmp_p_c.variant = "RAM"
+    RAM.append(temp_p_c)
+
+#NOTE: The usage variable is all that is used by the neural network.
+
+#####SET UP FOR THE CPU AND RAM END#######
+
+
+    
+
 #create node class
 class Node():
     outputs = []
@@ -35,6 +64,8 @@ class request():#This class contains the data from the list of needed items
 
 requests = []
 DataList = []
+Queue = [] # Very important variable, this is used for the current queue data 
+
 
 def ImportData(): #This function will populate the requests when called. Takes times to do
     #Read statis is weather to read the file again or just use the d
@@ -89,70 +120,81 @@ def FindImp(result,network,reward):#Finds the impact of a node on a given neural
                     while TargetNode != out_node:#while the target that the trace is on isn't the last one
                         TargetNode.weights[0]
                         
-                        
+#If you are reading this message, get the hell out of the files                        
                 
                 
     
+#The input nodes will need to be 5 for each of the different requests that are waiting.
+#There will also needs to be a node for each of the different          
     
-    
+
+#NOTE: I am assuming that there will be 12 RAM units and 12 CPU cores.
 
 #Create the node classes
-layer0Objs = []
-layer1Objs = []
-layer2Objs = []
-layer3Objs = []
-layer4Objs = []
-layer5Objs = []
-in_layers = [layer5Objs,layer4Objs,layer3Objs,layer2Objs,layer1Objs,layer0Objs]
+                    ##This is the new code for the neural network##
+layer0Objs = [] #Input layer should be 50 for the queue and 24 for RAM and CPU
+layer1Objs = []#Roughly a hundred for this layer
+layer2Objs = []#Roughly a hundred for this layer
+layer3Objs = []#There needs to be 24 outputs nodess
+#layer4Objs = [] 
+#layer5Objs = []
+in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
 
 #generate nodes and place them in the correct layers
-objs = [Node() for i in range(100)]
-for i in range(0, 24):
+objs = [Node() for i in range(298)] # 74 + 200 + 24 : 298 is the total number of nodes
+for i in range(0, 74):
+    objs[i].layer = 0
+for i in range(74, 174):
     objs[i].layer = 1
     layer1Objs.append(objs[i])
-for i in range(25, 50):
+for i in range(174, 274):
     objs[i].layer = 2
     layer2Objs.append(objs[i])
-for i in range(51, 75):
+for i in range(274, 298):
     objs[i].layer = 3
-    layer3Objs.append(objs[i])
-for i in range(76, 99):
-    objs[i].layer = 4
-    layer4Objs.append(objs[i])
+    
     
 
+    
+#These 2 chunks of code were used for making a single input and single output node.
+
 #sets up input and output nodes
-in_node = Node()
-in_node.outputs = layer1Objs
-in_node.layer = 0
-layer0Objs.append(in_node)
+#in_node = Node()
+#in_node.outputs = layer1Objs
+#in_node.layer = 0
+#layer0Objs.append(in_node)
 
-out_node = Node()
-out_node.inputs = layer4Objs
-out_node.layer = 5
-layer5Objs.append(out_node)
-objs.append(out_node)
+#out_node = Node()
+#out_node.inputs = layer4Objs
+#out_node.layer = 5
+#layer5Objs.append(out_node)
+#objs.append(out_node)
 
-
+    #   Note the layers should be first around 50 and then 100 100 then to the number needed.
 #set up inputs and outputs
-for i in layer1Objs:
-    i.outputs = layer2Objs
-    i.inputs = in_node
+    
+for i in layer0Objs: #The input nodes only need output values
+    i.outputs = layer1Objs
 
-for i in layer2Objs:
+for i in layer1Objs: # layer 1
+    i.outputs = layer2Objs
+    i.inputs = layer0Objs
+
+for i in layer2Objs: # layer 2
     i.output = layer3Objs
     i.inputs = layer1Objs
 
-for i in layer3Objs:
-    i.outputs = layer4Objs
+for i in layer3Objs: # the final layer
+    #i.outputs = layer4Objs   # Since this is the output layer it doesn't need outputs
     i.inputs = layer2Objs
 
-for i in layer4Objs:
-    i.inputs = layer3Objs
-    i.outputs.append(out_node)
+#for i in layer4Objs:    # This code is no longer in the neural network
+    #i.inputs = layer3Objs
+    #i.outputs.append(out_node)
     
 
-#The hidden layers are layers 1-4 with 0 the input and 5 the output.
+#The hidden layers are layers 1-2 with 0 the input and 3 the output.
+#It used to be there were 6 layers but now there are fewer but more nodes all together
 
 for i in objs:#Gives the nodes their output weights randomly.
     for j in i.outputs:
@@ -186,17 +228,46 @@ def save_weights(in_layers):#Saves the weights, it has increadibly high demands.
     print("The node weights have been saved.")
     
     
+#def undateReqs(Queue):#This code will update the values in the neural network.
+    
+        
+
+
 #def backprop():
     
     
     
 def run(inp):
-    in_node.temp_value = inp # This code performs the function of transmiting the data
-    for i in objs:
+    #in_node.temp_value = inp # This code performs the function of transmiting the data
+    #old data entry code ^^^^^^
+    
+    for i in objs: #This code cleans the all of the nodes, after it the start value are set.
         i.temp_value = 0
         i.temp_nums = []
-    in_node.temp_value = 1 #This is only temp code for testing temp_value can be different
-
+    ######## ENTER DATA START ##########
+    for i in range(0, 10): # For every single part of the input layer in the first 50
+        #This first half of the code gets data for the queue elements
+        layer0Objs[i*5].temp_value = Queue[i].priority #This sets the different inputs
+        layer0Objs[1+i*5].temp_value = Queue[i].CPUsReq#as inputs for the neural network
+        layer0Objs[2+i*5].temp_value = Queue[i].RAMReq
+        layer0Objs[3+i*5].temp_value = Queue[i].exp_wait
+        layer0Objs[4+i*5].temp_value = Queue[i].actual_wait
+    
+    temp_idx = 0
+    for i in range(50, 62):#This code is for the rest of the network
+        #This half of the submit gets data from the CPU partition.
+        #NOTE: I am assuming that there are 12 cores and 12 RAM units
+        layer0Objs[i] = CPUs[temp_idx]
+        temp_idx += 1
+    
+    temp_idx = 0
+    for i in range(62, 74):#This is like the last but for the RAM
+        layer0Objs[i] = RAM[temp_idx] 
+        temp_idx += 1
+        
+    ########### ENTER DATA END ##############
+    
+    
     for i in layer0Objs:
         temp_idx = 0
         for j in i.outputs:
@@ -459,6 +530,7 @@ while True:
             print(i.RAMReq,"The requirements for RAM")
             print(i.CPUsReq,"The requirements for CPU")
             print(i.exp_wait,"The time it expects to wait.")
+    
 
             
             
