@@ -19,16 +19,16 @@ class Partition():#This class contains the data for the partition of either cpu 
 
 CPUs = [] # These are empty lists for the differet pieces of RAM and CPU
 RAM = []
-
-for i in range(0, 12):
+        # There now needs to be 32 units of both RAM and CPU
+for i in range(0, 32):
     tmp_p_c = Partition()
     tmp_p_c.variant  = "CPU" #This is the code for creating CPUs
-    CPUs.append(temp_p_c)
+    CPUs.append(tmp_p_c)
 
-for i in range(0, 12):
+for i in range(0, 32):
     tmp_p_c = Partition()
     tmp_p_c.variant = "RAM"
-    RAM.append(temp_p_c)
+    RAM.append(tmp_p_c)
 
 #NOTE: The usage variable is all that is used by the neural network.
 
@@ -105,7 +105,7 @@ def linsearch(array,find):
     idx += 1
     return idx
 
-def FindImp(result,network,reward):#Finds the impact of a node on a given neural network result
+def FindImp(result,network,reward,out_node):#Finds the impact of a node on a given neural network result
             #Result = what the network get
             #network = the network itself
             #reward = the value gotten how good it performed should be some value(maybe pos and neg)
@@ -117,7 +117,7 @@ def FindImp(result,network,reward):#Finds the impact of a node on a given neural
                     #now i need to trace it forwards and determine the impact of each node
                     TargetNode = i#current trace node
                     impact = 1 # what impact the node in particular has on the output
-                    while TargetNode != out_node:#while the target that the trace is on isn't the last one
+                    while TargetNode not in out_node:#while the target that the trace is on isn't the last one
                         TargetNode.weights[0]
                         
 #If you are reading this message, get the hell out of the files                        
@@ -128,7 +128,7 @@ def FindImp(result,network,reward):#Finds the impact of a node on a given neural
 #There will also needs to be a node for each of the different          
     
 
-#NOTE: I am assuming that there will be 12 RAM units and 12 CPU cores.
+#NOTE: I am assuming that there will be 32 RAM units and 32 CPU cores.
 
 #Create the node classes
                     ##This is the new code for the neural network##
@@ -141,16 +141,17 @@ layer3Objs = []#There needs to be 24 outputs nodess
 in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
 
 #generate nodes and place them in the correct layers
-objs = [Node() for i in range(298)] # 74 + 200 + 24 : 298 is the total number of nodes
-for i in range(0, 74):
+objs = [Node() for i in range(478)] # 50(Queue) + 64(CPU and RAM) + 300 + 64 :  is the total number of nodes
+# There are now 150 nodes in each layer
+for i in range(0, 114):
     objs[i].layer = 0
-for i in range(74, 174):
+for i in range(114, 264):
     objs[i].layer = 1
     layer1Objs.append(objs[i])
-for i in range(174, 274):
+for i in range(264, 414):
     objs[i].layer = 2
     layer2Objs.append(objs[i])
-for i in range(274, 298):
+for i in range(414, 478):
     objs[i].layer = 3
     
     
@@ -244,6 +245,7 @@ def run(inp):
     for i in objs: #This code cleans the all of the nodes, after it the start value are set.
         i.temp_value = 0
         i.temp_nums = []
+    
     ######## ENTER DATA START ##########
     for i in range(0, 10): # For every single part of the input layer in the first 50
         #This first half of the code gets data for the queue elements
@@ -313,54 +315,32 @@ def run(inp):
         for n in i.temp_nums:
             i.temp_value += n 
             
-        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
-        #square root
+        curve = 1/(1+(math.e**(0-i.temp_value/1000)))#Sigmoid graph point calculation
+        #square root     #Since there is now only 4 layers layer 3 is the last
         root = math.sqrt(curve)
         
         i.temp_value = root#This sets the value for the node to be that of the eq    
         print(i.temp_value,"temp val of l3")
         temp_idx = 0
-        for j in i.outputs:
-            j.temp_nums.append(i.temp_value*i.weights[temp_idx])
-            temp_idx += 1
+        #for j in i.outputs:
+            #j.temp_nums.append(i.temp_value*i.weights[temp_idx])
+            #temp_idx += 1
     
-    for i in layer4Objs:
-        for n in i.temp_nums: 
-            i.temp_value += n
-        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
-        #square root
-        root = math.sqrt(curve)
-        i.temp_value = root#This sets the value for the node to be that of the eq
-        print(i.temp_value,"temp val of l4")
-        temp_idx = 0
-        for j in i.outputs:
-            j.temp_nums.append(i.temp_value*i.weights[temp_idx])
-            temp_idx += 1
-    
-    for i in layer5Objs:
-        for n in i.temp_nums:
-            i.temp_value += n
-        print(i.temp_value)
-        curve = 1/(1+(math.e**(0-(i.temp_value/1000))))#Sigmoid graph point calculation
-       #The curve used here is made so numbers in the hundreds will result in managable numbers.
-        
-        #square root
-        
-        print("curve",curve)
-        root = math.sqrt(curve)
-        
-        i.temp_value = root#This sets the value for the node to be that of the eq
-        print(i.temp_value,"temp val of l5")
-        print(i)
+   
     #Now all nodes that have data in temp_nums will have it added.
         
    # for i in objs:
       #  for j in i.temp_nums:
            # i.temp_value += (j)
-    print(out_node)
-    print(out_node.temp_value,"last")
-    end_out = out_node.temp_value # might be a problem with setting the value of the output to something else
-    
+    #print(out_node)
+    #print(out_node.temp_value,"last")
+    #end_out = out_node.temp_value # might be a problem with setting the value of the output to something else
+   
+    end_out = []
+    for i in layer3Objs: # This code is meant to create a list that is returned
+        end_out.append(i)
+        
+        
     
     
     return end_out
@@ -381,7 +361,7 @@ while True:
             print(end_out)
             dif = abs(end_out-Desired)#finds the difference
             #it needs to be able to save the current layout of the weights
-            in_layers = [layer5Objs,layer4Objs,layer3Objs,layer2Objs,layer1Objs,layer0Objs]
+            in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
             #save_weights(in_layers) Commented because of lag and high storage usage
             print(dif,"difference")
             diff_cache.append(dif)
@@ -412,7 +392,7 @@ while True:
             #What will now happen is the impact that each path has will be determined and then the impact of each node and each weight.
     
             n_c_idx = 0#The node choose index
-            for o in layer5Objs:#For every single output node
+            for o in layer3Objs:#For every single output node  #Changed to layer3 (might not work)
                 temp_c_node = o#Sets the value to the first thing.
                 while temp_c_node not in layer0Objs:#While the node it has gone back to isn't an input node. 
                      if type(temp_c_node.inputs) != list:
