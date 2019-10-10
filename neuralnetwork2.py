@@ -10,6 +10,8 @@ import math
 global end_out
 global TotalWaitTime #This variable is the total time that is waited by requests, perhaps waited by importance.
 
+Datalist = [] # Sets up the value of Datalist as empty so the data can be called.
+
 #####SET UP FOR THE CPU AND RAM START######
 class Partition():#This class contains the data for the partition of either cpu or RAM
     variant = ""#Either CPU or RAM
@@ -88,8 +90,9 @@ def ImportData(): #This function will populate the requests when called. Takes t
         
 def refresh_line(DataList,Queue):#Adds more data to the queue from the file data
     for i in range(0,(10 - len(Queue))):
-        requests.append()
-        del DataList[0]
+        requests.append() # Adds data to the requests list, Queue in normal code.
+        del DataList[0] # Takes the data from the DataList
+    return DataList, requests #This outputs the data from the function
         
         
         
@@ -238,15 +241,25 @@ def save_weights(in_layers):#Saves the weights, it has increadibly high demands.
     
     
     
-def run(inp):
+def run(inp, Datalist):
+    # Will now need to load data from the list.
+    Queue = []
+    
     #in_node.temp_value = inp # This code performs the function of transmiting the data
     #old data entry code ^^^^^^
     
+    #The code below loads the requests from the Datalist
+    
+    if Datalist == []: #If the Datalist is empty it will call a function that will open data
+        Datalist = ImportData()
+    Datalist,Queue = refresh_line(Datalist,Queue)
+    
     for i in objs: #This code cleans the all of the nodes, after it the start value are set.
         i.temp_value = 0
-        i.temp_nums = []
+        i.temp_nums = 0
     
     ######## ENTER DATA START ##########
+    print(Queue,"This is the Queue data.")
     for i in range(0, 10): # For every single part of the input layer in the first 50
         #This first half of the code gets data for the queue elements
         layer0Objs[i*5].temp_value = Queue[i].priority #This sets the different inputs
@@ -357,7 +370,7 @@ while True:
         train_times = int(input("How many times do you want the algorithm to train for."))
         datetime_object = datetime.datetime.now()
         for i in range(0, train_times):
-            end_out = run(inp)#runs the network once
+            end_out = run(inp, Datalist)#runs the network once
             print(end_out)
             dif = abs(end_out-Desired)#finds the difference
             #it needs to be able to save the current layout of the weights
