@@ -15,7 +15,7 @@ Datalist = [] # Sets up the value of Datalist as empty so the data can be called
 #####SET UP FOR THE CPU AND RAM START######
 class Partition():#This class contains the data for the partition of either cpu or RAM
     variant = ""#Either CPU or RAM
-    Owner_Id = ""#This is the identifier of the 
+    Owner_Id = ""#This is the identifier of which object is the owner.
     usage = False#Weather or not in use, other values should be empty except for variant if this is false
 
 
@@ -72,8 +72,13 @@ Queue = [] # Very important variable, this is used for the current queue data
 def ImportData(): #This function will populate the requests when called. Takes times to do
     #Read statis is weather to read the file again or just use the d
     print("Will now load request data from file.")
-    rq_f_n = input("What file do you want to open, include extension.")
-    rq_file = open(rq_f_n,"r")
+    while True:
+        rq_f_n = input("What file do you want to open, include extension.")
+        try:
+            rq_file = open(rq_f_n,"r")
+            break
+        except:
+            print("Sorry, that file can't be found.")
     rq_data = rq_file.read() # reads the data from the file
     rq_data.replace("(","")  # All of this code cleans the data and readies it for use. 
     rq_data.replace(")","")
@@ -90,7 +95,7 @@ def ImportData(): #This function will populate the requests when called. Takes t
         
 def refresh_line(DataList,Queue):#Adds more data to the queue from the file data
     for i in range(0,(10 - len(Queue))):
-        requests.append() # Adds data to the requests list, Queue in normal code.
+        requests.append(DataList[0]) # Adds data to the requests list, Queue in normal code.
         del DataList[0] # Takes the data from the DataList
     return DataList, requests #This outputs the data from the function
         
@@ -146,8 +151,10 @@ in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
 #generate nodes and place them in the correct layers
 objs = [Node() for i in range(478)] # 50(Queue) + 64(CPU and RAM) + 300 + 64 :  is the total number of nodes
 # There are now 150 nodes in each layer
+
 for i in range(0, 114):
     objs[i].layer = 0
+    layer0Objs.append(objs[i])
 for i in range(114, 264):
     objs[i].layer = 1
     layer1Objs.append(objs[i])
@@ -256,10 +263,10 @@ def run(inp, Datalist):
     
     for i in objs: #This code cleans the all of the nodes, after it the start value are set.
         i.temp_value = 0
-        i.temp_nums = 0
+        i.temp_nums = [] #This was an error when it was set to 0
     
     ######## ENTER DATA START ##########
-    print(Queue,"This is the Queue data.")
+    #print(len(Queue),"This is the Queue data.") # I think this should work
     for i in range(0, 10): # For every single part of the input layer in the first 50
         #This first half of the code gets data for the queue elements
         layer0Objs[i*5].temp_value = Queue[i].priority #This sets the different inputs
@@ -269,24 +276,25 @@ def run(inp, Datalist):
         layer0Objs[4+i*5].temp_value = Queue[i].actual_wait
     
     temp_idx = 0
-    for i in range(50, 62):#This code is for the rest of the network
+    for i in range(50, 82):#This code is for the rest of the network
         #This half of the submit gets data from the CPU partition.
         #NOTE: I am assuming that there are 12 cores and 12 RAM units
-        layer0Objs[i] = CPUs[temp_idx]
+        layer0Objs[i].temp_value = int(CPUs[temp_idx].usage) # This is the problem the objs are being set to partition.
         temp_idx += 1
     
     temp_idx = 0
-    for i in range(62, 74):#This is like the last but for the RAM
-        layer0Objs[i] = RAM[temp_idx] 
+    for i in range(82, 114):#This is the wrong number of things to edit.
+        layer0Objs[i].temp_value = int(RAM[temp_idx].usage)
         temp_idx += 1
         
     ########### ENTER DATA END ##############
     
-    
+
     for i in layer0Objs:
         temp_idx = 0
+        print(i,"this will be a partition or something so it won't work.")
         for j in i.outputs:
-            j.temp_value = i.temp_value * i.weights[temp_idx] #The problem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
+            j.temp_value = float(i.temp_value) * i.weights[temp_idx] #The problem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
             temp_idx += 1
             
 
@@ -372,12 +380,12 @@ while True:
         for i in range(0, train_times):
             end_out = run(inp, Datalist)#runs the network once
             print(end_out)
-            dif = abs(end_out-Desired)#finds the difference
+           # dif = abs(end_out - Desired)#finds the difference # This code doesn't work for the need for a many output network
             #it needs to be able to save the current layout of the weights
             in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
             #save_weights(in_layers) Commented because of lag and high storage usage
-            print(dif,"difference")
-            diff_cache.append(dif)
+            #print(dif,"difference")
+            diff_cache.append(0) # Should contain a difference but since the code is very different it can't be fixed.
             print(end_out,"Actual output")
             #Back prop start#
            # for l in in_layers: #For every single layer in the network
