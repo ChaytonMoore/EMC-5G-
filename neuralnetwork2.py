@@ -65,7 +65,6 @@ class request():#This class contains the data from the list of needed items
 
 
 requests = []
-DataList = []
 Queue = [] # Very important variable, this is used for the current queue data 
 
 
@@ -256,10 +255,11 @@ def run(inp, Datalist):
     #old data entry code ^^^^^^
     
     #The code below loads the requests from the Datalist
-    
+    print(Datalist)
     if Datalist == []: #If the Datalist is empty it will call a function that will open data
         Datalist = ImportData()
     Datalist,Queue = refresh_line(Datalist,Queue)
+    
     
     for i in objs: #This code cleans the all of the nodes, after it the start value are set.
         i.temp_value = 0
@@ -292,7 +292,6 @@ def run(inp, Datalist):
 
     for i in layer0Objs:
         temp_idx = 0
-        print(i,"this will be a partition or something so it won't work.")
         for j in i.outputs:
             j.temp_value = float(i.temp_value) * i.weights[temp_idx] #The problem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
             temp_idx += 1
@@ -364,12 +363,12 @@ def run(inp, Datalist):
         
     
     
-    return end_out
+    return end_out,Datalist
 
 while True:
     co = input("What do you want to know /do?")
     if co == "help":
-        print("train: Trains the algorithm")
+        print("train: Trains the algorithm.")
         print("kill: Kills the current code for resets.")
     
     if co == "train":
@@ -378,7 +377,7 @@ while True:
         train_times = int(input("How many times do you want the algorithm to train for."))
         datetime_object = datetime.datetime.now()
         for i in range(0, train_times):
-            end_out = run(inp, Datalist)#runs the network once
+            end_out,Datalist = run(inp, Datalist)#runs the network once
             print(end_out)
            # dif = abs(end_out - Desired)#finds the difference # This code doesn't work for the need for a many output network
             #it needs to be able to save the current layout of the weights
@@ -532,6 +531,3 @@ while True:
             print(i.CPUsReq,"The requirements for CPU")
             print(i.exp_wait,"The time it expects to wait.")
     
-
-            
-            
