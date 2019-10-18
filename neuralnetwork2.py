@@ -10,6 +10,17 @@ import math
 global end_out
 global TotalWaitTime #This variable is the total time that is waited by requests, perhaps waited by importance.
 
+global RAM_Usage# These two variables are the total usuage of the RAM and CPU
+global CPU_Usage
+RAM_Usage = []
+CPU_Usage = []
+
+for i in range(0, 32): #This will fill up the values for the usage lists
+    RAM_Usage.append(0)
+    CPU_Usage.append(0)
+
+    
+
 Datalist = [] # Sets up the value of Datalist as empty so the data can be called.
 
 #####SET UP FOR THE CPU AND RAM START######
@@ -20,8 +31,7 @@ class Partition():#This class contains the data for the partition of either cpu 
 
 
 CPUs = [] # These are empty lists for the differet pieces of RAM and CPU
-RAM = []
-        # There now needs to be 32 units of both RAM and CPU
+RAM = [] # There now needs to be 32 units of both RAM and CPU
 for i in range(0, 32):
     tmp_p_c = Partition()
     tmp_p_c.variant  = "CPU" #This is the code for creating CPUs
@@ -69,7 +79,7 @@ Queue = [] # Very important variable, this is used for the current queue data
 
 
 def ImportData(): #This function will populate the requests when called. Takes times to do
-    #Read statis is weather to read the file again or just use the d
+    #Read statis is weather to read the file again or just use the d(don't know what this is meant to say)
     print("Will now load request data from file.")
     while True:
         rq_f_n = input("What file do you want to open, include extension.")
@@ -93,9 +103,14 @@ def ImportData(): #This function will populate the requests when called. Takes t
     return classD#returns the class list to the main programme.
         
 def refresh_line(DataList,Queue):#Adds more data to the queue from the file data
+    
     for i in range(0,(10 - len(Queue))):
-        requests.append(DataList[0]) # Adds data to the requests list, Queue in normal code.
-        del DataList[0] # Takes the data from the DataList
+        try: #Sometimes it won't work. I don't care if this is bad practise or not.
+            requests.append(DataList[0]) # Adds data to the requests list, Queue in normal code.
+            del DataList[0] # Takes the data from the DataList
+        except:#If the list isn't the correct length.
+            print("There is insufficient data for this, just pray it works.")
+            break
     return DataList, requests #This outputs the data from the function
         
         
@@ -142,7 +157,7 @@ def FindImp(result,network,reward,out_node):#Finds the impact of a node on a giv
 layer0Objs = [] #Input layer should be 50 for the queue and 24 for RAM and CPU
 layer1Objs = []#Roughly a hundred for this layer
 layer2Objs = []#Roughly a hundred for this layer
-layer3Objs = []#There needs to be 24 outputs nodess
+layer3Objs = []#There needs to be 24 outputs nodes
 #layer4Objs = [] 
 #layer5Objs = []
 in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
@@ -162,6 +177,7 @@ for i in range(264, 414):
     layer2Objs.append(objs[i])
 for i in range(414, 478):
     objs[i].layer = 3
+    layer3Objs.append(objs[i])
     
     
 
@@ -357,13 +373,11 @@ def run(inp, Datalist):
     #end_out = out_node.temp_value # might be a problem with setting the value of the output to something else
    
     end_out = []
+    print(layer3Objs)
     for i in layer3Objs: # This code is meant to create a list that is returned
-        end_out.append(i)
-        
-        
+        end_out.append(i.temp_value)
     
-    
-    return end_out,Datalist
+    return end_out,Datalist #Returns the data from run to the main programme
 
 while True:
     co = input("What do you want to know /do?")
@@ -380,6 +394,7 @@ while True:
             end_out,Datalist = run(inp, Datalist)#runs the network once
             print(end_out)
            # dif = abs(end_out - Desired)#finds the difference # This code doesn't work for the need for a many output network
+
             #it needs to be able to save the current layout of the weights
             in_layers = [layer3Objs,layer2Objs,layer1Objs,layer0Objs]
             #save_weights(in_layers) Commented because of lag and high storage usage
@@ -437,7 +452,6 @@ while True:
                      #to get the weight of the node.
                      temp_c_node = temp_c_node.inputs[n_c_idx]#sets the temp node to the next value
                 #The while loop has now finished. And the temp vars will be put into other vars and then emptied
-                print("The end of a while loop run.")
                 paths.append(temp_path)
                 paths_weights.append(temp_path_weights)
                 #Now empty the temp vars
@@ -459,10 +473,26 @@ while True:
                # if weight #I Think I 'll simulate the event of a weight getting a 
                
                 
+        tmp_idx = 0      
+        for i in layer3Objs: # This code will round the code to the nearest whole number
+            if i.temp_value < 5:
+                layer3Objs[tmp_idx].temp_value = 0
+            else:
+                layer3Objs[tmp_idx].temp_value = 1
+            tmp_idx += 1
+        
                 
+        #Now I need to make the code that writes to the classes
+        for i in range(0, 32):#Turning it to a boolean may not be a good idea.
+            CPUs[i].usage = bool(layer3Objs[i].temp_value)
+        for i in range(32, 64):
+            RAM[i].usage = bool(layer3Objs[i].temp_value)
+        
+            
+        print("This is the end of thing.")
             
             
-        print("Diffcache",diff_cache)    
+        #print("Diffcache",diff_cache)    
         datetime_object2 = datetime.datetime.now()
         print("Time taken was",datetime_object2 - datetime_object)#outputs time taken
         save_q = input("Do you want to save the difference output as a .nng file.y/n")
@@ -470,7 +500,7 @@ while True:
             file = open("difference_cache.nng","w")
             file.write(str(diff_cache))
             file.close()
-
+            
             
         
             
@@ -507,7 +537,7 @@ while True:
             data2[i] = float(data2[i])
         # plotting the points  
         plt.plot(x, data2) 
-          
+        
         # naming the x axis 
         plt.xlabel('iteration') 
         # naming the y axis 
