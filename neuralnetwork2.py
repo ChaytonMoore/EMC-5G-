@@ -1,11 +1,11 @@
-#Under CC:BY-NC
-#Neural network code
-#import numpy as np
+#Chesterfield's genetic code
+#Chesterfield was helped named by Aziz
 import random
 import datetime
 import matplotlib.pyplot as plt
 import math
 
+#print("I'm not called Joe I'm called Chesterfield.")
 
 global end_out
 global TotalWaitTime #This variable is the total time that is waited by requests, perhaps waited by importance.
@@ -143,7 +143,7 @@ def FindImp(result,network,reward,out_node):#Finds the impact of a node on a giv
                         TargetNode.weights[0]
                         
 #If you are reading this message, get the hell out of the files                        
-                
+#Yeah because I never read my comments it must be an intruder.
                 
     
 #The input nodes will need to be 5 for each of the different requests that are waiting.
@@ -178,8 +178,7 @@ for i in range(264, 414):
 for i in range(414, 478):
     objs[i].layer = 3
     layer3Objs.append(objs[i])
-    
-    
+
 
     
 #These 2 chunks of code were used for making a single input and single output node.
@@ -199,20 +198,20 @@ for i in range(414, 478):
     #   Note the layers should be first around 50 and then 100 100 then to the number needed.
 #set up inputs and outputs
     
-for i in layer0Objs: #The input nodes only need output values
-    i.outputs = layer1Objs
+for i in range(0, len(layer0Objs)): #The input nodes only need output values
+    layer0Objs[i].ouputs = layer1Objs
 
-for i in layer1Objs: # layer 1
-    i.outputs = layer2Objs
-    i.inputs = layer0Objs
+for i in range(0, len(layer1Objs)): # layer 1
+    layer1Objs[i].outputs = layer2Objs
+    layer1Objs[i].inputs = layer0Objs
 
-for i in layer2Objs: # layer 2
-    i.output = layer3Objs
-    i.inputs = layer1Objs
+for i in range(0, len(layer2Objs)): # layer 2
+    layer2Objs[i].output = layer3Objs
+    layer2Objs[i].inputs = layer1Objs
 
-for i in layer3Objs: # the final layer
+for i in range(0, len(layer3Objs)): # the final layer
     #i.outputs = layer4Objs   # Since this is the output layer it doesn't need outputs
-    i.inputs = layer2Objs
+    layer3Objs[i].inputs = layer2Objs
 
 #for i in layer4Objs:    # This code is no longer in the neural network
     #i.inputs = layer3Objs
@@ -222,9 +221,10 @@ for i in layer3Objs: # the final layer
 #The hidden layers are layers 1-2 with 0 the input and 3 the output.
 #It used to be there were 6 layers but now there are fewer but more nodes all together
 
-for i in objs:#Gives the nodes their output weights randomly.
-    for j in i.outputs:
-        i.weights.append(random.random())
+        
+for i in range(0, len(objs)): #Gives the nodes their weight values.
+    for j in range(0, len(objs[i].outputs)):
+        objs[i].weights.append(random.random())
 
 
 #Now the working of the neural network
@@ -276,10 +276,9 @@ def run(inp, Datalist):
         Datalist = ImportData()
     Datalist,Queue = refresh_line(Datalist,Queue)
     
-    
-    for i in objs: #This code cleans the all of the nodes, after it the start value are set.
-        i.temp_value = 0
-        i.temp_nums = [] #This was an error when it was set to 0
+    for i in range(0, len(objs)): #This code cleans the nodes.
+        objs[i].temp_value = 0
+        objs[i].temp_nums = []
     
     ######## ENTER DATA START ##########
     #print(len(Queue),"This is the Queue data.") # I think this should work
@@ -306,57 +305,86 @@ def run(inp, Datalist):
     ########### ENTER DATA END ##############
     
 
-    for i in layer0Objs:
-        temp_idx = 0
-        for j in i.outputs:
-            j.temp_value = float(i.temp_value) * i.weights[temp_idx] #The problem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
-            temp_idx += 1
+    #for i in layer0Objs:   # This code is the old code for the stuff above.
+        #temp_idx = 0
+        #for j in i.outputs:
+            #j.temp_value = float(i.temp_value) * i.weights[temp_idx] #The problem is that the temp_values need to be set for the next row or 0 is the result of multiplying 0 and the weight.
+           # temp_idx += 1
+    
+    for i in range(0, len(layer0Objs)): # I think this new and improved code that should work, works.
+        #print(layer0Objs[i].temp_value,"temp value")
+        for n in layer1Objs:#This code should create the outputs things which are needed.
+            layer0Objs[i].outputs.append(n) 
+        
+        
+        for j in range(0, len(layer0Objs[i].outputs)):#6/11/19 this code right now isn't running
+            layer0Objs[i].outputs[j].temp_nums.append(float(layer0Objs[i].temp_value) * layer0Objs[i].weights[j])
+        #The last to lines which I've editted should mean it works.
             
+    #print(1/1+(math.e**))
+   # print("Test thing")
+    print(math.sqrt(1/(1+(math.e**((0-35)/100)))))
+    passinp = input("cont")
+    
 
-    for i in layer1Objs:
-        for n in i.temp_nums:#So we have created a number from all the other nodes nums sum.
-            i.temp_value += n
+
+    for i in range(0, len(layer1Objs)):
+        #The code here should get the data from the last layer.
+            
+        #print("S",layer1Objs[i].temp_nums)
+        for n in layer1Objs[i].temp_nums:#So we have created a number from all the other nodes nums sum.
+            layer1Objs[i].temp_value += n  #This code won't be running as there is nothing here.      
         #sigmoid equation
-        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
+        
+        #print(layer1Objs[i].temp_value,"there is something")
+        curve = 1/(1+(math.e**((0-layer1Objs[i].temp_value)/100)))#Sigmoid graph point calculation
+        #print("This is second value",curve)
         #square root
         root = math.sqrt(curve)
         
-        i.temp_value = root#This sets the value for the node to be that of the eq
-        print(i.temp_value,"temp value")
+        layer1Objs[i].temp_value = root#This sets the value for the node to be that of the eq
+        print(layer1Objs[i].temp_value,"temp value")
        
         
-        i.temp_nums = []
+        layer1Objs[i].temp_nums = []
         temp_idx = 0
-        for j in i.outputs:
-            j.temp_nums.append(i.temp_value*i.weights[temp_idx])
+        for j in range(0, len(layer1Objs[i].outputs)):
+            layer1Objs[i].outputs[j].temp_nums.append(layer1Objs[i].temp_value*layer1Objs[i].weights[temp_idx])
             temp_idx += 1
+    
+    
+    #This code should check that actual values are transfered.
+    #This code is to see why it is only outputing root 0.5
+    #Chesterfield has XY chromosomes hence he is male.
+    
         
-    for i in layer2Objs:
-        for n in i.temp_nums:
-            i.temp_value += n
-        i.temp_nums = []
+    for i in range(0, len(layer2Objs)):
+        for n in layer2Objs[i].temp_nums:
+            layer2Objs[i].temp_value += n
+        layer2Objs[i].temp_nums = []
         temp_idx = 0
-        curve = 1/(1+(math.e**(0-i.temp_value)))#Sigmoid graph point calculation
+        curve = 1/(1+(math.e**(0-layer2Objs[i].temp_value)))#Sigmoid graph point calculation
         #square root
         root = math.sqrt(curve)
         
-        i.temp_value = root#This sets the value for the node to be that of the eq
-        print(i.temp_value,"temp val of l2")
+        layer2Objs[i].temp_value = root#This sets the value for the node to be that of the eq
         
-        for j in i.outputs:
-            j.temp_nums.append(i.temp_value*i.weights[temp_idx])
+        for j in range(0, len(layer2Objs[i].outputs)):
+            layer2Objs[i].outputs[j].temp_nums.append(layer2Objs[i].temp_value*layer2Objs[i].weights[temp_idx])
             temp_idx += 1
     
-    for i in layer3Objs:
-        for n in i.temp_nums:
-            i.temp_value += n 
+    print("This is the ")
+    
+    for i in range(0, len(layer3Objs)):
+        for n in layer3Objs[i].temp_nums:
+            layer3Objs[i].temp_value = layer3Objs[i].temp_value + n 
             
-        curve = 1/(1+(math.e**(0-i.temp_value/1000)))#Sigmoid graph point calculation
+        curve = 1/(1+(math.e**(0-layer3Objs[i].temp_value/1000)))#Sigmoid graph point calculation
         #square root     #Since there is now only 4 layers layer 3 is the last
         root = math.sqrt(curve)
         
-        i.temp_value = root#This sets the value for the node to be that of the eq    
-        print(i.temp_value,"temp val of l3")
+        layer3Objs[i].temp_value = root#This sets the value for the node to be that of the eq    
+        print(layer3Objs[i].temp_value,"temp val of l3")
         temp_idx = 0
         #for j in i.outputs:
             #j.temp_nums.append(i.temp_value*i.weights[temp_idx])
@@ -373,7 +401,6 @@ def run(inp, Datalist):
     #end_out = out_node.temp_value # might be a problem with setting the value of the output to something else
    
     end_out = []
-    print(layer3Objs)
     for i in layer3Objs: # This code is meant to create a list that is returned
         end_out.append(i.temp_value)
     
@@ -485,8 +512,11 @@ while True:
         #Now I need to make the code that writes to the classes
         for i in range(0, 32):#Turning it to a boolean may not be a good idea.
             CPUs[i].usage = bool(layer3Objs[i].temp_value)
+            
+        tmp_idx = 0
         for i in range(32, 64):
-            RAM[i].usage = bool(layer3Objs[i].temp_value)
+            RAM[tmp_idx].usage = bool(layer3Objs[i].temp_value)
+            tmp_idx += 1
         
             
         print("This is the end of thing.")
@@ -509,7 +539,7 @@ while True:
         exit()
     if co == "run1":
         print("Running once.")
-        end_out = run(inp)
+        end_out = run(inp, Datalist)
         print("Final value of output node was",end_out)
         print("The difference between the desired and actual num was", abs(Desired- end_out))
         
