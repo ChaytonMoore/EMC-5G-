@@ -3,10 +3,7 @@
 import random
 import datetime
 import matplotlib.pyplot as plt
-import math
-
-                             
-#Notes:The variable below is a list of symbols for a base 50 system.                      
+import math                    
                  
 global end_out
 global TotalWaitTime #This variable is the total time that is waited by requests, perhaps waited by importance.
@@ -78,6 +75,18 @@ class request():#This class contains the data from the list of needed items
         self.exp_wait = exp_wait
 
 
+def mean(array):
+    total = 0
+    for i in array:
+        total += i
+    try:
+        total = total / len(array)
+    except:
+        print("Error:The list supplied is of length 0")
+    
+    return total
+
+
 requests = []
 Queue = [] # Very important variable, this is used for the current queue data 
 
@@ -119,10 +128,6 @@ def refresh_line(DataList,Queue):#Adds more data to the queue from the file data
         
         
         
-        
-    
-
-
 def linsearch(array,find):
     idx = 0
     for i in array:
@@ -187,25 +192,20 @@ for i in range(414, 478):
     #   Note the layers should be first around 50 and then 100 100 then to the number needed.
 #set up inputs and outputs
     
-for i in range(0, len(layer0Objs)): #The input nodes only need output values
+for i in range(0, len(layer0Objs)): 
     layer0Objs[i].ouputs = layer1Objs
 
-for i in range(0, len(layer1Objs)): # layer 1
+for i in range(0, len(layer1Objs)): 
     layer1Objs[i].outputs = layer2Objs
     layer1Objs[i].inputs = layer0Objs
 
-for i in range(0, len(layer2Objs)): # layer 2
+for i in range(0, len(layer2Objs)): 
     layer2Objs[i].output = layer3Objs
     layer2Objs[i].inputs = layer1Objs
 
-for i in range(0, len(layer3Objs)): # the final layer
-    #i.outputs = layer4Objs   # Since this is the output layer it doesn't need outputs
+for i in range(0, len(layer3Objs)):
     layer3Objs[i].inputs = layer2Objs
 
-#for i in layer4Objs:    # This code is no longer in the neural network
-    #i.inputs = layer3Objs
-    #i.outputs.append(out_node)
-    
 
 #The hidden layers are layers 1-2 with 0 the input and 3 the output.
 #It used to be there were 6 layers but now there are fewer but more nodes all together
@@ -248,10 +248,72 @@ def save_weights(in_layers):#Saves the weights, it has increadibly high demands.
         
 
 
-#def backprop():
+def backprop(neurons,outputs,reward,Lreward):#This is the code that will perfect the neural network
+    #Each node needs to have a responsability tied to it.
+    reward = Lreward / reward # If the current reward is better will be a value above one if not below.
+    layer2Objs = []
+    for i in neurons:
+        if i.layer == 2:
+            layer2Objs.append(i)
     
+    #So now I will need to determine the effect each node has on the answer.
+    layer2Impacts = []
+    layer1Impacts = []
+    layer0Impacts = []
+    for i in neurons:
+        if i.layer == 2:
+            layer2Impacts.append(mean(i.weights))
+
+    idx = 0    
+    for i in neurons:
+        if i.layer == 1:
+            tmp_lst = []
+            for j in i.outputs:
+                tmp_lst.append(layer2Impacts[idx]*i.weights[idx])
+            idx += 1
+            layer1Impacts.append(mean(tmp_lst))
+     
+    idx = 0
+    for i in neurons:
+        if i.layer == 0:
+            tmp_lst = []
+            for j in i.outputs:
+                tmp_lst.append(layer1Impacts[idx]*i.weights[idx])
+            idx += 1
+            layer0Impacts.append(mean(tmp_lst)) 
+            
+    #It has now be found what every single node has in terms of impact on the network
+    #It now needs to go and edit the weights based on the rewards.
+    for i in range(0,len(neurons)):
+        if neurons[i].layer == 0:
+            for j in range(0, len(neurons[i].weights)):
+                editable = (neurons[i].weights[j])*layer0Impacts[i]
+                leftover = neurons[i].weights[j]-editable
+                editable = editable * reward
+                neurons[i].weights[j] = leftover + editable
+                
+        if neurons[i].layer == 1:
+            for j in range(0, len(neurons[i].weights)):
+                editable = (neurons[i].weights[j])*layer1Impacts[i]
+                leftover = neurons[i].weights[j]-editable
+                editable = editable * reward
+                neurons[i].weights[j] = leftover + editable
+        
+        if neurons[i].layer == 2:
+            for j in range(0, len(neurons[i].weights)):
+                editable = (neurons[i].weights[j])*layer2Impacts[i]
+                leftover = neurons[i].weights[j]-editable
+                editable = editable * reward
+                neurons[i].weights[j] = leftover + editable
+                
+    #This code should edit the weights of the nodes to a fair degree with the various factors
     
-    
+    return neurons
+            
+            
+            
+                
+        
 def run(inp, Datalist):
     # Will now need to load data from the list.
     Queue = []
@@ -260,7 +322,7 @@ def run(inp, Datalist):
     #old data entry code ^^^^^^
     
     #The code below loads the requests from the Datalist
-    print(Datalist)
+    #print(Datalist)
     if Datalist == []: #If the Datalist is empty it will call a function that will open data
         Datalist = ImportData()
     Datalist,Queue = refresh_line(Datalist,Queue)
@@ -314,9 +376,9 @@ def run(inp, Datalist):
         #sigmoid equation
         layer1Objs[i].temp_value = math.sqrt(layer1Objs[i].temp_value)
         layer1Objs[i].temp_value = math.sqrt(layer1Objs[i].temp_value)
-        print("val",layer1Objs[i].temp_value)
+        #print("val",layer1Objs[i].temp_value)
         curve = 1/(1+(math.e**((0-(layer1Objs[i].temp_value/5)**2))))#Sigmoid graph point calculation
-        print("2 data-",curve)
+        #print("2 data-",curve)
         #print(curve)
         #print("This is second value",curve)
         #square root
@@ -378,6 +440,7 @@ def run(inp, Datalist):
         #for j in i.outputs:
             #j.temp_nums.append(i.temp_value*i.weights[temp_idx])
             #temp_idx += 1
+        
    
     
    
@@ -409,6 +472,7 @@ while True:
         train_times = int(input("How many times do you want the algorithm to train for."))
         datetime_object = datetime.datetime.now()
         step = 0 #Set the step to start at 0, the first time step.
+        runtimes = 0
         for i in range(0, train_times):
             #This is the code that will get data from a file and read it as the RAM + CPU
             nodeinp = open("out.nnca","r")
@@ -421,7 +485,6 @@ while True:
                 
             
             end_out,Datalist = run(inp, Datalist)#runs the network once
-            print(end_out)
            # dif = abs(end_out - Desired)#finds the difference # This code doesn't work for the need for a many output network
 
             #it needs to be able to save the current layout of the weights
@@ -480,7 +543,7 @@ while True:
                             dataW[len(dataW)-1].append(Datalist[0].exp_wait)
                             #dataW[len(dataW)-1].append(i)
                         else:
-                            print(len(Datalist))
+                           # print(len(Datalist))
                             dataW[len(dataW)-1].append("c")#type of thing
                             dataW[len(dataW)-1].append(Datalist[0].exp_wait)#time to process
                            # dataW[len(dataW)-1].append(i) #refnum
@@ -521,8 +584,18 @@ while True:
             file.write(str(diff_cache))
             file.close()
         
-        
+        if runtimes == 0:
+            rewardm1 = datetime_object2 - datetime_object
         step += 1 #This adds one to the step, a programme counter.
+        reward0 = datetime_object2- datetime_object
+        obj = backprop(objs,0,reward0,rewardm1)
+        rewardm1 = reward0
+        runtimes += 1
+        if runtimes == 0:
+            for objectEntity in range(0, len(objs)):
+                for weightEntity in range(0, len(objectEntity)):
+                    objs[objectEntity].weights[weightEntity] = random.random
+                    
             
     
         
@@ -583,3 +656,12 @@ while True:
             print(i.RAMReq,"The requirements for RAM")
             print(i.CPUsReq,"The requirements for CPU")
             print(i.exp_wait,"The time it expects to wait.")
+    
+    if co == "backprop view":
+        print("This dry runs the code for backpropagation")
+        for i in range(0, len(objs)):
+            for j in range(0, len(objs[i].weights)):
+                objs[i].weights[j] = random.random()
+        for i in range(0, len(layer0Objs)):
+            layer0Objs[i].outputs = layer1Objs
+        obj = backprop(objs,0,1,1)
